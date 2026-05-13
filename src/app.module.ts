@@ -1,13 +1,34 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SpTransModule } from './sptrans/sptrans.module';
+import { ExtractorModule } from './extractor/extractor.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+
+    // Conexão com PostgreSQL no Google Cloud SQL
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres' as const,
+        host: config.get<string>('DB_HOST', 'localhost'),
+        port: config.get<number>('DB_PORT', 5432),
+        username: config.get<string>('DB_USERNAME', 'postgres'),
+        password: config.get<string>('DB_PASSWORD', ''),
+        database: config.get<string>('DB_DATABASE', 'sptrans_db'),
+        autoLoadEntities: true,
+        synchronize: true, // Cria tabelas automaticamente (desabilitar em produção)
+        logging: config.get<string>('DB_LOGGING', 'false') === 'true',
+      }),
+    }),
+
     SpTransModule,
+    ExtractorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

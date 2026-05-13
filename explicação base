@@ -1,0 +1,76 @@
+# SPTrans Module — Walkthrough
+
+## O que foi feito
+
+Módulo NestJS completo que integra com a **API Olho Vivo SPTrans v2.1**, cobrindo todos os recursos da API.
+
+## Estrutura de arquivos criados
+
+```
+src/sptrans/
+├── domain/
+│   ├── linha.entity.ts        # Linha de ônibus
+│   ├── parada.entity.ts       # Ponto de parada
+│   ├── corredor.entity.ts     # Corredor inteligente
+│   ├── empresa.entity.ts      # Empresa operadora
+│   ├── posicao.entity.ts      # Posição dos veículos
+│   └── previsao.entity.ts     # Previsão de chegada
+├── infra/
+│   └── sptrans-http.client.ts # Cliente HTTP com gerenciamento de sessão/cookie
+├── sptrans.service.ts          # Serviço com métodos tipados
+├── sptrans.service.spec.ts     # Testes unitários (16 testes)
+├── sptrans.controller.ts       # Controller REST /sptrans/*
+└── sptrans.module.ts           # Módulo NestJS
+src/app.module.ts               # Atualizado para importar SpTransModule
+.env.example                    # Template de configuração
+```
+
+## Endpoints disponíveis
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/sptrans/linhas?termos=8000` | Busca linhas por nome ou número |
+| GET | `/sptrans/linhas/sentido?termos=8000&sentido=1` | Busca linha por sentido de operação |
+| GET | `/sptrans/paradas?termos=Afonso` | Busca paradas por nome/endereço |
+| GET | `/sptrans/paradas/por-linha?codigoLinha=1273` | Paradas de uma linha |
+| GET | `/sptrans/paradas/por-corredor?codigoCorredor=8` | Paradas de um corredor |
+| GET | `/sptrans/corredores` | Lista todos os corredores inteligentes |
+| GET | `/sptrans/empresas` | Lista todas as empresas operadoras |
+| GET | `/sptrans/posicao` | Posição de todos os veículos |
+| GET | `/sptrans/posicao/linha?codigoLinha=1273` | Posição dos veículos de uma linha |
+| GET | `/sptrans/posicao/garagem?codigoEmpresa=999` | Veículos em garagem |
+| GET | `/sptrans/previsao?codigoParada=340015329&codigoLinha=1273` | Previsão de chegada |
+| GET | `/sptrans/previsao/linha?codigoLinha=1273` | Previsão por linha |
+| GET | `/sptrans/previsao/parada?codigoParada=340015329` | Previsão por parada |
+
+## Testes
+
+```
+PASS  src/app.controller.spec.ts
+PASS  src/sptrans/sptrans.service.spec.ts
+
+Test Suites: 2 passed, 2 total
+Tests:       16 passed, 16 total
+Time:        3.725 s
+```
+
+## Como usar
+
+1. Crie `.env` a partir do [.env.example](file:///c:/Users/falle/.gemini/antigravity/scratch/sptrans-api/.env.example) e adicione seu token:
+   ```
+   SPTRANS_TOKEN=seu_token_aqui
+   ```
+2. Inicie o servidor:
+   ```bash
+   npm run start:dev
+   ```
+3. Teste um endpoint:
+   ```bash
+   curl "http://localhost:3000/sptrans/linhas?termos=8000"
+   curl "http://localhost:3000/sptrans/corredores"
+   curl "http://localhost:3000/sptrans/posicao"
+   ```
+
+> **Nota:** O token deve ser gerado em [sptrans.com.br/desenvolvedores](https://www.sptrans.com.br/desenvolvedores/)
+
+Proximos passos:Adicionar api do ibge de população, scrap de download de mais dados csv, transformar csv e casar com regioes, criar datalake e salvar dados
